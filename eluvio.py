@@ -35,7 +35,8 @@ df = df>> select(X.up_votes,X.title)
 # if up_votes number > threshold is an attractive news; o.w. it is not an attractive news
 threshold = np.quantile( df['up_votes'], 0.8) # corresponding value is 24
 
-df = df >> mutate(category = (X.up_votes>threshold)*1 )
+df = df >> mutate(category = (X.up_votes>threshold)*1 ) >> \
+     mutate(sample_weight = case_when([X.category == 0, 0.2],[X.category == 1, 0.8]))
 
 print('The number of the attractive news', sum(df['category']), '; the number of the non-attractive news', len(df)-sum(df['category']),'.')
 print('The raito of attractive ~ non-attractive is', sum(df['category'])/(len(df)-sum(df['category'])),'.')
@@ -60,7 +61,7 @@ print('The number of the training data is ', len(train), '; the number of the te
 # test_x = message_embeddings
 test_x = np.loadtxt('covariate.csv',delimiter = ',')
 test_y = test['category'].values.tolist()
-print('The proportion of the attractive news in testing data is ', sum(test_y)/len(test_y))
+print('The proportion of the attractive news in testing data is ', sum(test_y)/len(test_y),'.')
 test_y = onehot_encoder(test_y)
 
 
@@ -69,12 +70,12 @@ test_y = onehot_encoder(test_y)
 
 def dnn(x):
     with tf.name_scope('layer_1'):
-        W_1 = weight_variable([512,512])
-        b_1 = bias_variable([512])
+        W_1 = weight_variable([512,256])
+        b_1 = bias_variable([256])
         h_1 = tf.nn.relu(tf.matmul(x, W_1) + b_1)
 
     with tf.name_scope('layer_2'):
-        W_2 = weight_variable([512,128])
+        W_2 = weight_variable([256,128])
         b_2 = bias_variable([128])
         h_2 = tf.nn.relu(tf.matmul(h_1, W_2) + b_2)
 
@@ -115,11 +116,12 @@ def main():
         cross_entropy = tf.reduce_mean(cross_entropy)
 
     with tf.name_scope('adam_optimizer'):
-        train_step = tf.train.AdamOptimizer(1e-2).minimize(cross_entropy)
+        train_step = tf.train.AdamOptimizer(1e-3).minimize(cross_entropy)
 
     with tf.name_scope('Average_Accuracy'):
         correct_prediction = tf.cast(tf.equal(tf.argmax(y_pred, 1), tf.argmax(y, 1)), tf.float32)
         accuracy = tf.reduce_mean(correct_prediction)
+
 
     trainwriter = tf.summary.FileWriter('./dnn/train')
     testwriter = tf.summary.FileWriter('./dnn/test')
@@ -131,8 +133,8 @@ def main():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         # Training cycle
-        for epoch in range(10):
-            batch_train_df = train.sample(100)
+        for epoch in range(50):
+            batch_train_df = train.sample(50, weights= 'sample_weight')
             batch_ys = onehot_encoder(batch_train_df['category'].values.tolist())
             batch_xs = USencoder(batch_train_df['title'].values.tolist())
 
