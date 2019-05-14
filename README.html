@@ -498,6 +498,7 @@ def USencoder(l):
 <h2>Some Idea</h2>
 <ul>
 <li><p>So far, the classification results is not good enough. I think this is mainly because the universal sentence encoder can not efficiently extract the information from the titles. A good way to improve this is to use some NLP models to learning the sentence vectors for these titles.</p></li>
+<li><p>Another reason for the low accuary is because our algorithm doesn’t converge. The result would be better with more iterations.</p></li>
 <li><p>The data is unbalanced. In my attempt, I use the oversample method to balance the data in the batch. I think it would be better to re-design the loss function.</p></li>
 <li><p>Due to the limited computation resource, I didn’t use the overparameterized dnn model. But I think it will reduce the generalization error by increasing the parameter number.</p></li>
 <li><p>I think it will useful to add the time as covaraite to learning the deep learning model. But the structure needs to be modified.</p></li>
