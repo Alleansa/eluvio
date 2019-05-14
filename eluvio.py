@@ -1,6 +1,5 @@
 import tensorflow as tf
 import tensorflow_hub as hub
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from dfply import *
@@ -33,13 +32,13 @@ df = df>> select(X.up_votes,X.title)
 
 # class the data into two groups: with threshold as the 80% of the up_votes
 # if up_votes number > threshold is an attractive news; o.w. it is not an attractive news
-threshold = np.quantile( df['up_votes'], 0.8) # corresponding value is 24
+threshold = np.quantile( df['up_votes'], 0.7) # corresponding value is 24
 
 df = df >> mutate(category = (X.up_votes>threshold)*1 ) >> \
-     mutate(sample_weight = case_when([X.category == 0, 0.2],[X.category == 1, 0.8]))
+     mutate(sample_weight = case_when([X.category == 0, 0.3],[X.category == 1, 0.7]))
 
 print('The number of the attractive news', sum(df['category']), '; the number of the non-attractive news', len(df)-sum(df['category']),'.')
-print('The raito of attractive ~ non-attractive is', sum(df['category'])/(len(df)-sum(df['category'])),'.')
+
 
 np.random.seed(seed=1)
 score = pd.DataFrame(np.random.randn(df.shape[0], 1))
@@ -100,7 +99,7 @@ def weight_variable(shape):
     return tf.Variable(initial, name = 'W')
 
 def bias_variable(shape):
-    initial = tf.constant(0.1, shape = shape)
+    initial = tf.constant(.1, shape = shape)
     return tf.Variable(initial, name = 'b')
 
 def main():
@@ -116,25 +115,32 @@ def main():
         cross_entropy = tf.reduce_mean(cross_entropy)
 
     with tf.name_scope('adam_optimizer'):
-        train_step = tf.train.AdamOptimizer(1e-3).minimize(cross_entropy)
+        train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
     with tf.name_scope('Average_Accuracy'):
         correct_prediction = tf.cast(tf.equal(tf.argmax(y_pred, 1), tf.argmax(y, 1)), tf.float32)
         accuracy = tf.reduce_mean(correct_prediction)
 
+    with tf.name_scope('True_Positive'):
+        tp = tf.reduce_sum(tf.argmax(y_pred, 1) * tf.argmax(y, 1))/ tf.reduce_sum(tf.argmax(y, 1))
+
+    with tf.name_scope('True_Negative'):
+        tn = tf.reduce_sum((1-tf.argmax(y_pred, 1)) * (1-tf.argmax(y, 1)))/ tf.reduce_sum(1-tf.argmax(y, 1))
 
     trainwriter = tf.summary.FileWriter('./dnn/train')
     testwriter = tf.summary.FileWriter('./dnn/test')
     trainwriter.add_graph(tf.get_default_graph())
     tf.summary.scalar('Prediction_Accuracy', accuracy)
     tf.summary.scalar('Objective_Loss', cross_entropy)
+    tf.summary.scalar('Pred_True_Positive', tp)
+    tf.summary.scalar('Pred_True_Negative', tn)
     s = tf.summary.merge_all()
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         # Training cycle
-        for epoch in range(50):
-            batch_train_df = train.sample(50, weights= 'sample_weight')
+        for epoch in range(100):
+            batch_train_df = train.sample(64, weights= 'sample_weight')
             batch_ys = onehot_encoder(batch_train_df['category'].values.tolist())
             batch_xs = USencoder(batch_train_df['title'].values.tolist())
 

@@ -21,12 +21,12 @@ However, I think there might be a strong relationship between the title and the 
 
 ## Steo 0: Data Processing
 
-First, I use the 80% quantile of the up votes as the threshold to group the sample as the attractive news and non-attractive news. 
+First, I use the 70% quantile of the up votes as the threshold to group the sample as the attractive news and non-attractive news. 
 
 ```python
 # class the data into two groups: with threshold as the 80% of the up_votes
 # if up_votes number > threshold is an attractive news; o.w. it is not an attractive news
-threshold = np.quantile( df['up_votes'], 0.8) # corresponding value is 24
+threshold = np.quantile( df['up_votes'], 0.7) 
 ```
 
 Because of the limited computation resource, I set about 5000 data as testing data and the rest as the training data. (This is because I need to evaluation the testing accuracy at each iteration. The large size of testing data will increase the evaluation time.)
@@ -70,9 +70,20 @@ Here I use the four layer Deep Neural Network Classifier (see the figure). In ea
 
 ![](dnn.png)
 
-Because the data is unbalanced: attractive/nonattractive $\approx$ 2/8. So I oversample the attracive news for the training: in each batch, the sample weights for attractive/nonattractive news are 0.8/0.2, repectively.
+Because the data is unbalanced: attractive/nonattractive $\approx$ 3/7. So I oversample the attracive news for the training: in each batch, the sample weights for attractive/nonattractive news are 0.7/0.3, repectively.
 
 ## Current result
+
+The current result can be viewed with the tensorboard: in the command line,
+```python
+tensorboard --logdir 'dnn'
+```
+
+It can be seen from the accuracy plot: at the beginning, the accuracy is 0.3, which means all the samples are classified as 1. With optimizing, the accuracy is improved to 0.6, which means the classfier can correctly distinguish part of the samples.  
+
+![](Obj.png){width=250px}![](acc.png){width=250px}
+
+Because my model didn't converge. It would have a better prediction as model converged.
 
 ## Some Idea
 
