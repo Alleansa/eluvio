@@ -81,7 +81,8 @@ tensorboard --logdir 'dnn'
 
 It can be seen from the accuracy plot: at the beginning, the accuracy is 0.3, which means all the samples are classified as 1. With optimizing, the accuracy is improved to 0.6, which means the classfier can correctly distinguish part of the samples.  
 
-![](Obj.png){width=250px}![](acc.png){width=250px}
+![](Obj.png){width=250px}  
+![](acc.png){width=250px}  
 
 Because my model didn't converge. It would have a better prediction as model converged.
 
