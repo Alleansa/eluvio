@@ -89,6 +89,8 @@ Because my model didn't converge. It would have a better prediction as model con
 
 - So far, the classification results is not good enough. I think this is mainly because the universal sentence encoder can not efficiently extract the information from the titles. A good way to improve this is to use some NLP models to learning the sentence vectors for these titles.
 
+- Another reason for the low accuary is because our algorithm doesn't converge. The result would be better with more iterations.
+
 - The data is unbalanced. In my attempt, I use the oversample method to balance the data in the batch. I think it would be better to re-design the loss function.
 
 - Due to the limited computation resource, I didn't use the overparameterized dnn model. But I think it will reduce the generalization error by increasing the parameter number.
