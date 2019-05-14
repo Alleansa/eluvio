@@ -24,7 +24,7 @@ However, I think there might be a strong relationship between the title and the 
 First, I use the 70% quantile of the up votes as the threshold to group the sample as the attractive news and non-attractive news. 
 
 ```python
-# class the data into two groups: with threshold as the 80% of the up_votes
+# class the data into two groups: with threshold as the 70% of the up_votes
 # if up_votes number > threshold is an attractive news; o.w. it is not an attractive news
 threshold = np.quantile( df['up_votes'], 0.7) 
 ```
